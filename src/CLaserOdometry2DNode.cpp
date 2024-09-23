@@ -42,6 +42,7 @@ public:
 
   std::string         laser_scan_topic;
   std::string         odom_topic;
+  std::string         laser_scan_frame_id;
   std::string         base_frame_id;
   std::string         odom_frame_id;
   std::string         init_pose_from_topic;
@@ -74,6 +75,7 @@ CLaserOdometry2DNode::CLaserOdometry2DNode() :
   ros::NodeHandle pn("~");
   pn.param<std::string>("laser_scan_topic",laser_scan_topic,"/laser_scan");
   pn.param<std::string>("odom_topic", odom_topic, "/odom_rf2o");
+  pn.param<std::string>("laser_scan_frame_id", laser_scan_frame_id, "/laser_scan");
   pn.param<std::string>("base_frame_id", base_frame_id, "/base_link");
   pn.param<std::string>("odom_frame_id", odom_frame_id, "/odom");
   pn.param<bool>("publish_tf", publish_tf, true);
@@ -123,7 +125,9 @@ bool CLaserOdometry2DNode::setLaserPoseFromTf()
   transform.setIdentity();
   try
   {
-    tf_listener.lookupTransform(base_frame_id, last_scan.header.frame_id, ros::Time(0), transform);
+//    tf_listener.lookupTransform(base_frame_id, last_scan.header.frame_id, ros::Time(0), transform);
+    tf_listener.waitForTransform(base_frame_id, laser_scan_frame_id, ros::Time(0), ros::Duration(5.0));
+    tf_listener.lookupTransform(base_frame_id, laser_scan_frame_id, ros::Time(0), transform);
     retrieved = true;
   }
   catch (tf::TransformException &ex)
